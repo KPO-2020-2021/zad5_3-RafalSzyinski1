@@ -57,8 +57,15 @@ void DronePath::fillAscentMoves()
 /** Fill landing moves */
 void DronePath::fillLandingMoves()
 {
-    // TODO poprawic
-    double times = (height - DRONE_HEIGHT / 2) / SPEED;
+    using namespace VectorAction;
+    double landing_height = getLandingHeight();
+    if (landing_height == -1)
+    {
+        fillFlyingMoves(abs(drone.getDirection()));
+        moves.push_back(FlyStates::STOP_LAND);
+        return;
+    }
+    double times = (height - landing_height) / SPEED;
     for (int i = 0; i < times; ++i)
     {
         moves.push_back(FlyStates::LANDING);
@@ -178,9 +185,10 @@ void DronePath::overtaking(const Figure& fig)
  * Collision test with all figure in Scene
  * @return std::optional with object on drone way
  */
-std::optional<std::shared_ptr<Figure> > DronePath::collisionTest() const
+std::list<std::shared_ptr<Figure> > DronePath::collisionTest() const
 {
     using namespace VectorAction;
+    std::list<std::shared_ptr<Figure> > ret;
     auto dronePos = drone.getPosition();
     dronePos.at(2) = 0;
     auto droneRadius = drone.getCenterOfMass();
@@ -200,19 +208,50 @@ std::optional<std::shared_ptr<Figure> > DronePath::collisionTest() const
 
         double figureHeight = (i->getPosition().at(2) + i->getCenterOfMass().at(2)) + DRONE_HEIGHT;
 
-        if (figureHeight >= height)
-        {
-            if (std::abs(distance.at(0)) < figureRadius.at(0) && std::abs(distance.at(1)) < figureRadius.at(1))
-                return std::optional<std::shared_ptr<Figure> >(i);
-        }
-
+        if (std::abs(distance.at(0)) < figureRadius.at(0) && std::abs(distance.at(1)) < figureRadius.at(1))
+            ret.push_back(i);
     }
-    return {};
+    return ret;
 }
 
 /** @return height on which drone have to land or -1 if cannot land */
 double DronePath::getLandingHeight() const
 {
+    using namespace VectorAction;
+    auto collisionObjects = collisionTest();
 
-    return 0;
+    if (collisionObjects.size() > 1)
+        return -1;
+
+    if (collisionObjects.size() == 1)
+    {
+        auto* fig = dynamic_cast<Cuboid*>(collisionObjects.front().get());
+
+        if (!fig)
+            return -1;
+
+        auto dronePos = drone.getPosition();
+        auto droneRadius = drone.getCenterOfMass();
+        auto figureRadius = fig->getCenterOfMass();
+        auto figurePos = fig->getPosition();
+        dronePos.at(2) = 0;
+        droneRadius.at(2) = 0;
+        figureRadius.at(2) = 0;
+        figurePos.at(2) = 0;
+        double radius = abs(droneRadius);
+
+
+        figureRadius.at(0) = std::abs(figureRadius.at(0)) - radius;
+        figureRadius.at(1) = std::abs(figureRadius.at(1)) - radius;
+
+        auto distance = dronePos - figurePos;
+
+        if (std::abs(distance.at(0)) < figureRadius.at(0) && std::abs(distance.at(1)) < figureRadius.at(1))
+        {
+            return fig->getPosition().at(2) + fig->getCenterOfMass().at(2) + DRONE_HEIGHT / 2;
+        }
+
+    }
+
+    return DRONE_HEIGHT / 2;
 }

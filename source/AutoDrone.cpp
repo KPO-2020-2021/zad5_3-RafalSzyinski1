@@ -31,6 +31,10 @@ void AutoDrone::moveDown()
 void AutoDrone::moveStraight()
 {
     using namespace VectorAction;
+
+    for (auto& i : dronePath.collisionTest())
+        dronePath.overtaking(*i);
+    
     auto dir = getDirection();
     move(dir/abs(dir) * SPEED);
 }
@@ -79,8 +83,6 @@ void AutoDrone::fly()
                 moveUp();
                 break;
             case FlyStates::FLYING:
-                if (dronePath.collisionTest().has_value())
-                    dronePath.overtaking(*dronePath.collisionTest().value());
                 moveStraight();
                 break;
             case FlyStates::LANDING:

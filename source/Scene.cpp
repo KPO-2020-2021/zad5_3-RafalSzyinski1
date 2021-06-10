@@ -96,17 +96,17 @@ void Scene::printDrones() const
 /** Make nice area to fly */
 void Scene::makeMarsArea()
 {
-    addCuboid(Cuboid({60, 0, 0}, {0, 60, 0}, {0, 0, 20}, {50, 40, 0}));
-    Plane a({10, 0, 0}, {0, 60, 0}, {0, 0, 20}, {40, 40, 0});
+    addCuboid(Cuboid({90, 0, 0}, {0, 90, 0}, {0, 0, 20}, {50, 40, 0}));
+    Plane a({10, 0, 0}, {0, 90, 0}, {0, 0, 20}, {40, 40, 0});
     Transform::rotateAroundCenterOfMass(a, 180);
     addPlane(a);
-    Transform::translate(a, std::vector<double>({35, -35, 0}));
+    Transform::translate(a, std::vector<double>({50, -50, 0}));
     Transform::rotateAroundCenterOfMass(a, 90);
     addPlane(a);
-    Transform::translate(a, std::vector<double>({35, 35, 0}));
+    Transform::translate(a, std::vector<double>({50, 50, 0}));
     Transform::rotateAroundCenterOfMass(a, 90);
     addPlane(a);
-    Transform::translate(a, std::vector<double>({-35, 35, 0}));
+    Transform::translate(a, std::vector<double>({-50, 50, 0}));
     Transform::rotateAroundCenterOfMass(a, 90);
     addPlane(a);
 
