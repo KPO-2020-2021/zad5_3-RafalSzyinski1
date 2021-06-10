@@ -122,8 +122,8 @@ void Scene::makeMarsArea()
     addTetrahedron(d);
 
     addCuboid(Cuboid({100, 0, 0}, {0, 90, 0}, {0, 0, 20}, {-100, -90, 0}));
-    addCuboid(Cuboid({30, 0, 0}, {0, 90, 0}, {0, 0, 70}, {-130, -90, 0}));
-    addCuboid(Cuboid({130, 0, 0}, {0, 30, 0}, {0, 0, 70}, {-130, -120, 0}));
+    addCuboid(Cuboid({30, 0, 0}, {0, 90, 0}, {0, 0, 110}, {-130, -90, 0}));
+    addCuboid(Cuboid({130, 0, 0}, {0, 30, 0}, {0, 0, 110}, {-130, -120, 0}));
     Plane e({10, 0, 0}, {0, 90, 0}, {0, 0, 20}, {0, -90, 0});
     addPlane(e);
     Transform::rotateAroundCenterOfMass(e, 90);

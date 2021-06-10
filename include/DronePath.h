@@ -28,13 +28,13 @@ protected:
     void fillAscentMoves();
     void fillFlyingMoves(double distance);
     void fillRotateMoves(double angle);
+    double getLandingHeight() const;
 public:
     DronePath(const AutoDrone& _drone, const Scene& _scene);
     FlyStates getNextMove();
     void makeMoves(double angle, double distance);
     std::optional<std::shared_ptr<Figure> > collisionTest() const;
     void overtaking(const Figure& fig);
-    void overtaking(const AutoDrone& ad);
     void fillLandingMoves();
     std::list<std::string> getDrawString() const override;
 };

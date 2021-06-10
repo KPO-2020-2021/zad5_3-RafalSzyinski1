@@ -164,7 +164,7 @@ std::list<std::string> DronePath::getDrawString() const
  */
 void DronePath::overtaking(const Figure& fig)
 {
-    double figureHeight = (fig.getPosition().at(2) + fig.getCenterOfMass().at(2)) + DRONE_HEIGHT;
+    double figureHeight = (fig.getPosition().at(2) + fig.getCenterOfMass().at(2)) + (DRONE_HEIGHT * 2);
     if (figureHeight > height)
     {
         double times = (figureHeight - height) / SPEED;
@@ -176,18 +176,43 @@ void DronePath::overtaking(const Figure& fig)
 
 /**
  * Collision test with all figure in Scene
- * except Cuboid when drone is above (it mean that is platform)
  * @return std::optional with object on drone way
  */
 std::optional<std::shared_ptr<Figure> > DronePath::collisionTest() const
 {
     using namespace VectorAction;
-    auto pos = drone.getPosition();
+    auto dronePos = drone.getPosition();
+    dronePos.at(2) = 0;
+    auto droneRadius = drone.getCenterOfMass();
+    droneRadius.at(2) = 0;
+    double radius = abs(droneRadius) * 1.5;
     for (auto& i : scene.objects)
     {
-        auto temp = i->getPosition() - pos;
-        if (abs(temp) <= (abs(i->getCenterOfMass()) + abs(drone.getCenterOfMass())))
-            return std::optional<std::shared_ptr<Figure> >(i);
+        auto figureRadius = i->getCenterOfMass();
+        auto figurePos = i->getPosition();
+        figureRadius.at(2) = 0;
+        figurePos.at(2) = 0;
+
+        figureRadius.at(0) = std::abs(figureRadius.at(0)) + radius + PROPELLER_LENGTH;
+        figureRadius.at(1) = std::abs(figureRadius.at(1)) + radius + PROPELLER_LENGTH;
+
+        auto distance = dronePos - figurePos;
+
+        double figureHeight = (i->getPosition().at(2) + i->getCenterOfMass().at(2)) + DRONE_HEIGHT;
+
+        if (figureHeight >= height)
+        {
+            if (std::abs(distance.at(0)) < figureRadius.at(0) && std::abs(distance.at(1)) < figureRadius.at(1))
+                return std::optional<std::shared_ptr<Figure> >(i);
+        }
+
     }
     return {};
+}
+
+/** @return height on which drone have to land or -1 if cannot land */
+double DronePath::getLandingHeight() const
+{
+
+    return 0;
 }
