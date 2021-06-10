@@ -1,0 +1,6 @@
+[submodule "lib/gplotpp"]
+	path = lib/gplotpp
+	url = https://github.com/ziotom78/gplotpp.git
+[submodule "lib/googletest"]
+	path = lib/googletest
+	url = https://github.com/google/googletest.git

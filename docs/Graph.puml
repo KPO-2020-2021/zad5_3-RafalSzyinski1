@@ -1,0 +1,221 @@
+@startuml
+!define DARKBLUE
+!includeurl https://raw.githubusercontent.com/Drakemor/RedDress-PlantUML/master/style.puml
+
+
+skinparam component {
+    ArrowFontSize 14
+    ArrowFontColor #000000
+}
+
+title Drone
+legend top left
+-virtual method is marked with <&arrow-top>
+-static method is marked with <&bolt>
+-std::vector<double> is written as vec
+end legend
+
+
+
+class Drawable << (B, #22FF22) Base Class >>
+{
+    -color: std::string
+
+    -getStyle(): std::string
+
+    #getParallelogramString(vec, vec, vec) const: std::string
+    #getTriangleString(vec, vec, vec) const: std::string
+    #getLineString(vec, vec, vec) const: std::string
+
+    +Drawable()
+    +<&arrow-top>changeColor(std::string): void
+    +<&arrow-top>getDrawString() const: std::list<std::string>
+}
+
+class Figure  << (B, #22FF22) Base Class >> extends Drawable
+{
+    #sP: vec
+    #x: vec
+    #y: vec
+    #z: vec
+
+    -operator==(const Figure&, const Figure&) const: bool
+
+    +Figure(vec, vec, vec)
+    +getCenterOfMass() const: vec
+    +getPosition() const: vec
+}
+
+class Transform << (S, #FFD300) Static Class >>
+{
+    +<&bolt> rotateAroundPoint(Figure&, double, const vec&): void
+    +<&bolt> rotateAroundCenterOfMass(Figure&, double): void
+    +<&bolt> scaleToCenterOfMass(Figure&, double): void
+    +<&bolt> translate(Figure&, const vec&): void
+}
+
+Figure <.. Transform: <<Friend>>
+
+class Cuboid extends Figure
+{
+    +Cuboid(vec, vec, vec)
+    +<&arrow-top>getDrawString() const: std::list<std::string>
+}
+
+class Pyramid extends Figure
+{
+    +Pyramid(vec, vec, vec)
+    +<&arrow-top>getDrawString() const: std::list<std::string>
+}
+
+class Plane extends Figure
+{
+    +Plane(vec, vec, vec)
+    +<&arrow-top>getDrawString() const: std::list<std::string>
+}
+
+class Tetrahedron extends Figure
+{
+    +Tetrahedron((vec, vec, vec)
+    +<&arrow-top>getDrawString() const: std::list<std::string>
+}
+
+class Propeller extends Drawable
+{
+    -cuboids: std::vector<Cuboid>
+
+    +Propeller(const vec&)
+    +spin(double): void
+    +move(const vec&): void
+    +rotateAround(double, const vec&): void
+    +<&arrow-top>changeColor(std::string): void
+    +<&arrow-top>getDrawString() const: std::list<std::string>
+}
+
+Propeller "1" *-- "3" Cuboid
+
+class Drone extends Cuboid
+{
+    -propellers: std::vector<Propeller>
+
+    #getPropellerAt(int): Propeller&
+
+    +Drone(double, double)
+    +spin(double): void
+    +move(const vec&): void
+    +getDirection() const: const vec&
+    +<&arrow-top>changeColor(std::string): void
+    +<&arrow-top>getDrawString() const: std::list<std::string>
+}
+
+Drone "1" *-- "4" Propeller
+
+class AutoDrone extends Drone
+{
+    -dronePath: DronePath
+    -flying: bool
+
+    #spinPropellers(): void
+    #moveUp(): void
+    #moveDown(): void
+    #moveStraight(): void
+    #rotateRight(): void
+    #rotateLeft(): void
+
+    +AutoDrone(double, double, const Scene&)
+    +makePath(double, double): void
+    +fly(): void
+    +isFlying() const: bool
+    +<&arrow-top>getDrawString() const: std::list<std::string>
+
+}
+
+class DronePath extends Drawable
+{
+    -moves: std::deque<FlyStates>
+    -drone: const AutoDrone&
+    -scene: const Scene&
+    #fillAscentMoves(): void
+    #fillLandingMoves(): void
+    #fillFlyingMoves(double distance): void
+    #fillRotateMoves(double angle): void
+
+    +DronePath(const AutoDrone&, const Scene&);
+    +getNextMove(): FlyStates
+    +makeMoves(double, double);
+    +<&arrow-top>getDrawString() const: std::list<std::string>
+
+}
+
+AutoDrone "1" *-- "1" DronePath
+DronePath <.. AutoDrone
+DronePath <.. Scene
+
+class Gnuplot << gplot++.h >>
+{
+}
+
+class Plot extends Gnuplot
+{
+    -objects: std::list<std::string>
+
+    +add(const Drawable& fig): void
+    +drawAndClear(): void
+}
+
+Plot <.. Drawable
+
+class Scene
+{
+    -objects: std::list<std::shared_ptr<Figure> >
+    -drones: std::vector<std::shared_ptr<AutoDrone> >
+    -plot: Plot
+    -option: Options
+    -t1: std::thread
+
+    #<&bolt>getOption(Options& option): void
+    #<&bolt>printMenu(): void
+    #chooseDrone(): void
+    #printDrones() const: void
+    #makeMarsArea(): void
+    #addDrones(): void
+
+    +Scene()
+    + ~Scene()
+    +run(): void
+    +draw(): void
+    +addPlane(const Plane& plane): void
+    +addPyramid(const Pyramid& pyramid): void
+    +addCuboid(const Cuboid& cuboid): void
+    +addTetrahedron(const Tetrahedron& tetra): void
+}
+
+Scene "1" *-- "<&infinity>" Figure
+Scene "1" *-- "<&infinity>" AutoDrone
+Scene "1" *-- "1" Plot
+Scene <.. DronePath : <<Friend>>
+
+package Constance <<Frame>>
+{
+    enum FlyStates
+    {
+        NONE
+        ASCENT
+        FLYING
+        LANDING
+        ROTATE_LEFT
+        ROTATE_RIGHT
+        STOP
+        END
+    }
+
+    enum Options
+    {
+        NONE
+        EXIT
+        CHOOSE_DRONE
+        GET_POS
+    }
+}
+
+@enduml
