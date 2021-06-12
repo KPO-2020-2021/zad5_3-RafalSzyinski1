@@ -36,4 +36,3 @@
 build/
 cmake-build-debug/
 .idea/
-lib/
