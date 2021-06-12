@@ -114,6 +114,7 @@ class AutoDrone extends Drone
 {
     -dronePath: DronePath
     -flying: bool
+    -stop: bool
 
     #spinPropellers(): void
     #moveUp(): void
@@ -126,6 +127,7 @@ class AutoDrone extends Drone
     +makePath(double, double): void
     +fly(): void
     +isFlying() const: bool
+    +isStop() const: bool
     +<&arrow-top>getDrawString() const: std::list<std::string>
 
 }
@@ -146,6 +148,7 @@ class DronePath extends Drawable
     +getNextMove(): FlyStates
     +makeMoves(double, double): void
     +collisionTest() const: std::list<std::shared_ptr<Figure> >
+    +overtaking(const AutoDrone&): void
     +overtaking(const Figure&): void
     +fillLandingMoves(): void
     +<&arrow-top>getDrawString() const: std::list<std::string>
@@ -154,7 +157,7 @@ class DronePath extends Drawable
 
 AutoDrone "1" *-- "1" DronePath
 DronePath <.. AutoDrone
-DronePath <.. Scene
+DronePath <-- Scene
 
 class Gnuplot << gplot++.h >>
 {
