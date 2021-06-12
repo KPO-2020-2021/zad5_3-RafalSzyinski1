@@ -22,7 +22,6 @@ private:
     std::deque<FlyStates> moves;
     const AutoDrone& drone;
     const Scene& scene;
-
     double height;
 protected:
     void fillAscentMoves();
@@ -34,6 +33,7 @@ public:
     FlyStates getNextMove();
     void makeMoves(double angle, double distance);
     std::list<std::shared_ptr<Figure> > collisionTest() const;
+    void overtaking(const AutoDrone& dron);
     void overtaking(const Figure& fig);
     void fillLandingMoves();
     std::list<std::string> getDrawString() const override;

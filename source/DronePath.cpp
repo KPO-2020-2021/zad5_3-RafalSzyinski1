@@ -61,7 +61,7 @@ void DronePath::fillLandingMoves()
     double landing_height = getLandingHeight();
     if (landing_height == -1)
     {
-        fillFlyingMoves(abs(drone.getDirection()));
+        fillFlyingMoves(abs(drone.getDirection()) / 2);
         moves.push_back(FlyStates::STOP_LAND);
         return;
     }
@@ -182,7 +182,7 @@ void DronePath::overtaking(const Figure& fig)
 }
 
 /**
- * Collision test with all figure in Scene
+ * Collision test with all figure and drones in Scene
  * @return std::optional with object on drone way
  */
 std::list<std::shared_ptr<Figure> > DronePath::collisionTest() const
@@ -194,19 +194,22 @@ std::list<std::shared_ptr<Figure> > DronePath::collisionTest() const
     auto droneRadius = drone.getCenterOfMass();
     droneRadius.at(2) = 0;
     double radius = abs(droneRadius) * 1.5;
-    for (auto& i : scene.objects)
+    auto obj = scene.objects;
+    obj.insert(obj.begin(), scene.drones.begin(), scene.drones.end());
+    for (auto& i : obj)
     {
+        if (i.get() == &drone)
+            continue;
+
         auto figureRadius = i->getCenterOfMass();
         auto figurePos = i->getPosition();
         figureRadius.at(2) = 0;
         figurePos.at(2) = 0;
 
-        figureRadius.at(0) = std::abs(figureRadius.at(0)) + radius + PROPELLER_LENGTH;
-        figureRadius.at(1) = std::abs(figureRadius.at(1)) + radius + PROPELLER_LENGTH;
+        figureRadius.at(0) = std::abs(figureRadius.at(0)) + radius;
+        figureRadius.at(1) = std::abs(figureRadius.at(1)) + radius;
 
         auto distance = dronePos - figurePos;
-
-        double figureHeight = (i->getPosition().at(2) + i->getCenterOfMass().at(2)) + DRONE_HEIGHT;
 
         if (std::abs(distance.at(0)) < figureRadius.at(0) && std::abs(distance.at(1)) < figureRadius.at(1))
             ret.push_back(i);
@@ -230,6 +233,9 @@ double DronePath::getLandingHeight() const
         if (!fig)
             return -1;
 
+        if (dynamic_cast<AutoDrone*>(fig))
+            return -1;
+
         auto dronePos = drone.getPosition();
         auto droneRadius = drone.getCenterOfMass();
         auto figureRadius = fig->getCenterOfMass();
@@ -240,18 +246,15 @@ double DronePath::getLandingHeight() const
         figurePos.at(2) = 0;
         double radius = abs(droneRadius);
 
-
         figureRadius.at(0) = std::abs(figureRadius.at(0)) - radius;
         figureRadius.at(1) = std::abs(figureRadius.at(1)) - radius;
 
         auto distance = dronePos - figurePos;
 
         if (std::abs(distance.at(0)) < figureRadius.at(0) && std::abs(distance.at(1)) < figureRadius.at(1))
-        {
             return fig->getPosition().at(2) + fig->getCenterOfMass().at(2) + DRONE_HEIGHT / 2;
-        }
-
+        else
+            return -1;
     }
-
     return DRONE_HEIGHT / 2;
 }

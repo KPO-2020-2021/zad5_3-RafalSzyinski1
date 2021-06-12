@@ -135,14 +135,19 @@ class DronePath extends Drawable
     -moves: std::deque<FlyStates>
     -drone: const AutoDrone&
     -scene: const Scene&
+    -height: double
+
     #fillAscentMoves(): void
-    #fillLandingMoves(): void
     #fillFlyingMoves(double distance): void
     #fillRotateMoves(double angle): void
+    #getLandingHeight() const: double
 
     +DronePath(const AutoDrone&, const Scene&);
     +getNextMove(): FlyStates
-    +makeMoves(double, double);
+    +makeMoves(double, double): void
+    +collisionTest() const: std::list<std::shared_ptr<Figure> >
+    +overtaking(const Figure&): void
+    +fillLandingMoves(): void
     +<&arrow-top>getDrawString() const: std::list<std::string>
 
 }
@@ -205,6 +210,7 @@ package Constance <<Frame>>
         LANDING
         ROTATE_LEFT
         ROTATE_RIGHT
+        STOP_LAND
         STOP
         END
     }
