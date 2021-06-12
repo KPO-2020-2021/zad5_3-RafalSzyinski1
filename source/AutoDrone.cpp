@@ -33,8 +33,21 @@ void AutoDrone::moveStraight()
     using namespace VectorAction;
 
     for (auto& i : dronePath.collisionTest())
-        dronePath.overtaking(*i);
-    
+    {
+        auto dr = dynamic_cast<AutoDrone*>(i.get());
+        if (dr && !(dr->isStop()))
+        {
+            stop = true;
+            dronePath.overtaking(*dr);
+            return;
+        }
+        else
+        {
+            dronePath.overtaking(*i);
+        }
+    }
+
+    stop = false;
     auto dir = getDirection();
     move(dir/abs(dir) * SPEED);
 }
@@ -60,7 +73,7 @@ void AutoDrone::rotateLeft()
  * @param x position in x axis
  * @param y position in y axis
  */
-AutoDrone::AutoDrone(double x, double y, const Scene& _scene) : Drone(x, y), flying(false), dronePath(*this, _scene)
+AutoDrone::AutoDrone(double x, double y, const Scene& _scene) : Drone(x, y), flying(false), stop(true), dronePath(*this, _scene)
 {
 }
 
@@ -109,6 +122,14 @@ void AutoDrone::fly()
 bool AutoDrone::isFlying() const
 {
     return flying;
+}
+
+/** @return true if drone is not moving */
+bool AutoDrone::isStop() const
+{
+    if (!flying)
+        return true;
+    return stop;
 }
 
 /**

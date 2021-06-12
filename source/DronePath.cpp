@@ -165,6 +165,21 @@ std::list<std::string> DronePath::getDrawString() const
 }
 
 /**
+ * Overtaking drone method
+ * One of the drone will stop and second will fly above him
+ * @param dron overtaking drone
+ */
+void DronePath::overtaking(const AutoDrone& dron)
+{
+    if (dron.isStop())
+        return;
+    double times = (DRONE_HEIGHT * 2) / SPEED;
+    for (int i = 0; i < times; ++i)
+        moves.push_front(FlyStates::STOP);
+}
+
+
+/**
  * Overtaking method
  * Drone will be flight above object
  * @param fig Figure on collision
@@ -193,7 +208,7 @@ std::list<std::shared_ptr<Figure> > DronePath::collisionTest() const
     dronePos.at(2) = 0;
     auto droneRadius = drone.getCenterOfMass();
     droneRadius.at(2) = 0;
-    double radius = abs(droneRadius) * 1.5;
+    double radius = abs(droneRadius) * 1.7;
     auto obj = scene.objects;
     obj.insert(obj.begin(), scene.drones.begin(), scene.drones.end());
     for (auto& i : obj)

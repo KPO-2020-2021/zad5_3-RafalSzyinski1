@@ -13,6 +13,7 @@ class AutoDrone : public Drone
 private:
     DronePath dronePath;
     bool flying;
+    bool stop;
 protected:
     void spinPropellers();
     void moveUp();
@@ -26,6 +27,7 @@ public:
     void makePath(double angle, double distance);
     void fly();
     bool isFlying() const;
+    bool isStop() const;
     std::list<std::string> getDrawString() const override;
 };
 
